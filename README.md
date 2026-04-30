@@ -20,7 +20,7 @@
 | **Batch** | C |
 | **Course** | Software Engineering (R5IT2009T) |
 | **Institute** | VJTI Mumbai — IV B.Tech Computer Engineering |
-| **Date** | 30-05-2026 |
+| **Date** | 30-04-2026 |
 
 </div>
 
