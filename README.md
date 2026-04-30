@@ -367,7 +367,10 @@ Statement coverage, path coverage, condition coverage, and code coverage tables.
 | Statement Coverage | 7 / 7 CFG nodes — 100% |
 | Path Coverage | 8 / 8 independent paths — 100% |
 | Condition Coverage | 12 / 12 condition outcomes — 100% |
-| Code Coverage | 59 / 59 lines — 100% |
+| Overall Code Coverage | 59 / 59 lines — 100.0% |
+| Code Coverage — Black Box only | 45 lines hit — 81.8% |
+| Code Coverage — White Box only | 55 lines hit — 100.0% |
+| Code Coverage — Combined | 55 lines hit — 100.0% |
 
 ---
 
