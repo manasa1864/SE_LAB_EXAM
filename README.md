@@ -258,9 +258,14 @@ Fare  =  (rate per km  ×  distance_km)  +  Rs. 20 base charge
 
 | Path | Route | Covered By |
 |---|---|---|
-| Path 1 | N1 → N2 → N3 → N4 → N7 | WB-01 |
-| Path 2 | N1 → N2 → N3 → N5 → N7 | WB-02, WB-03, WB-05 |
-| Path 3 | N1 → N2 → N6 → N7 | WB-04 |
+| Path 1 | N1 → N2(null) → N3(avail+match) → N4 → N7 | WB-01 |
+| Path 2 | N1 → N2(null) → N3(offline) → N5 → N7 | WB-02 |
+| Path 3 | N1 → N2(null) → N3(type mismatch) → N5 → N7 | WB-03 |
+| Path 4 | N1 → N2(driver!=null) → N6 → N7 | WB-04 |
+| Path 5 | startRide(DRIVER_ASSIGNED) → ok | WB-06 |
+| Path 6 | startRide(not assigned) → throw | WB-09 |
+| Path 7 | completeRide(IN_PROGRESS) → ok | WB-06 |
+| Path 8 | completeRide(not started) → throw | WB-10 |
 
 #### White Box Test Cases
 
@@ -279,7 +284,7 @@ Fare  =  (rate per km  ×  distance_km)  +  Rs. 20 base charge
 | WB-11 | Statement | `Login_rider` not logged in | RideException | ✅ PASS |
 | WB-12 | Branch | Driver free after `completeRide()` | isAvailable() = true | ✅ PASS |
 | WB-13 | Statement | `calculateFare()` — SEDAN branch | fare > 0 (≈ Rs. 115) | ✅ PASS |
-| WB-14 | Statement | `Driver_finder::match_driver` — match found | BIKE driver returned | ✅ PASS |
+| WB-14 | Statement | `Driver_finder::match_driver` — match found | BIKE Driver_decision returned | ✅ PASS |
 | WB-15 | Branch | `Driver_finder::match_driver` — no match | nullptr | ✅ PASS |
 
 ---
@@ -307,35 +312,35 @@ Fare  =  (rate per km  ×  distance_km)  +  Rs. 20 base charge
 
 | TC ID | Type | Description | Expected Output | Result |
 |---|---|---|---|---|
-| BB-01 | ECP Valid | Valid `Rider_pick` & `Rider_dest`, Fare > 0 | fare = 115 Rs., PENDING | ✅ PASS |
+| BB-01 | ECP Valid | Valid `Rider_pick` & `Rider_dest`, Fare > 0 | fare=115 Rs., status=PENDING | ✅ PASS |
 | BB-02 | ECP Invalid | Empty `Rider_pick` name | InvalidLocationException | ✅ PASS |
 | BB-03 | ECP Invalid | `Login_rider` not authenticated | RideException | ✅ PASS |
 | BB-04 | ECP Valid | Vehicle = BIKE (rate = 8) | fare = 62 Rs. | ✅ PASS |
 | BB-05 | ECP Valid | Vehicle = AUTO (rate = 12) | fare = 83 Rs. | ✅ PASS |
 | BB-06 | ECP Valid | Vehicle = SUV (rate = 25) | fare = 152 Rs. | ✅ PASS |
-| BB-07 | BVA Boundary | Same pickup & drop (distance = 0) | fare = Rs. 20 | ✅ PASS |
+| BB-07 | BVA Boundary | Same pickup & drop (distance = 0) | fare = 20 Rs. | ✅ PASS |
 | BB-08 | ECP Invalid | `Driver_decision` ON_RIDE constraint | DriverNotAvailableException | ✅ PASS |
 | BB-09 | ECP Valid | Driver free (`activeRideId = -1`) | DRIVER_ASSIGNED | ✅ PASS |
 | BB-10 | BVA Boundary | Driver reuse after `completeRide()` | DRIVER_ASSIGNED | ✅ PASS |
 | BB-11 | ECP Valid | All 4 vehicle types produce Fare > 0 | All Fare > 0 | ✅ PASS |
-| BB-12 | BVA Boundary | Very short distance (~0.01 km) | fare ≈ Rs. 20 | ✅ PASS |
+| BB-12 | BVA Boundary | Very short distance (~0.01 km) | fare = 20.0 Rs. | ✅ PASS |
 | BB-13 | ECP Valid | `cancelRide()` from PENDING, no driver | CANCELLED | ✅ PASS |
 | BB-14 | ECP Invalid | Empty `Rider_dest` name | InvalidLocationException | ✅ PASS |
-| BB-15 | BVA Boundary | `Receipt::print()` after `completeRide()` | COMPLETED, receipt OK | ✅ PASS |
+| BB-15 | BVA Boundary | `Receipt::print()` after `completeRide()` | COMPLETED | ✅ PASS |
 
 ---
 
 ## How to Run
 
 ```bash
-g++ book_ride_final.cpp
+g++ book_ride_full.cpp
 ./a.out
 ```
 
 The program runs in three stages:
 
 **Stage 1 — Demo Simulation**
-Four live bookings showing the full ride flow — fare estimation, driver matching, ride lifecycle, receipt printing, and a cancel demo.
+Four live bookings showing the full ride flow — fare estimation, driver matching, ride lifecycle, receipt printing, and a cancel demo with `change_vehicle()`.
 
 **Stage 2 — Test Suite**
 15 Black Box + 15 White Box test cases printed in a formatted table with colour-coded PASS / FAIL results.
@@ -370,19 +375,18 @@ Statement coverage, path coverage, condition coverage, and code coverage tables.
 
 | File | Description |
 |---|---|
-| `book_ride_final.cpp` | C++ implementation — demo + 30 test cases + coverage reports |
+| `book_ride_full.cpp` | C++ implementation — demo + 30 test cases + coverage reports |
 | `BookRide_Professional.xlsx` | Excel test case sheet — White Box & Black Box (3 sheets) |
 | `README.md` | This file |
 | `Output1.jpeg` | Terminal — demo simulation |
-| `Output2.jpeg` | Terminal — Black Box test results |
-| `Output3.jpeg` | Terminal — White Box test results |
-| `Output4.jpeg` | Terminal — coverage reports |
+| `Output2.jpeg` | Terminal — Black Box & White Box test results |
+| `Output3.jpeg` | Terminal — statement, path & condition coverage |
+| `Output4.jpeg` | Terminal — code coverage report |
 
 ---
 
 <div align="center">
 
-*VJTI Mumbai &nbsp;·&nbsp; Software Engineering (R5IT2009T) &nbsp;·&nbsp; End Semester Lab Exam &nbsp;·&nbsp; 30-05-2026*
+*VJTI Mumbai &nbsp;·&nbsp; Software Engineering (R5IT2009T) &nbsp;·&nbsp; End Semester Lab Exam &nbsp;·&nbsp; 30-04-2026*
 
 </div>
-# SE_LAB_EXAM
